@@ -9,17 +9,9 @@
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn src/index.ts"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://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@github.com/ColtraneNadler/andrea-love-lab.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ColtraneNadler/andrea-love-lab/issues"
-  },
-  "homepage": "https://github.com/ColtraneNadler/andrea-love-lab#readme",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
     "dotenv": "^17.4.2",
