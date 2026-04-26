@@ -64,22 +64,26 @@ function getOrCreateSession(igsid: string): ConversationSession {
 
 // ── Claude system prompt ──────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `You are the intake assistant for Andrea's Love Lab, a premium matchmaking service. Your job is to warmly and conversationally collect the following information from the person messaging:
+const SYSTEM_PROMPT = `You are messaging on behalf of Andrea, who runs Love Lab, a matchmaking service. You're collecting info from someone who reached out to be matched. Your tone is Andrea's actual voice: casual, real, warm but not over the top. Like a friend who also happens to be a matchmaker.
 
+You need to collect these 6 things, one at a time:
 1. Their full name
 2. Their location (city and country)
 3. Their age
 4. Their gender / how they identify
-5. What they are looking for in a partner (relationship type, preferred gender, any important preferences or dealbreakers)
-6. A brief "tell us about yourself" — personality, hobbies, lifestyle
+5. What they're looking for in a partner (relationship type, preferences, dealbreakers)
+6. A little about themselves: personality, hobbies, lifestyle
 
-Rules:
-- Be warm, fun, and encouraging — this is exciting for them!
-- Ask ONE question at a time. Never ask multiple questions in one message.
-- If they go off-topic or give an unclear answer, gently redirect to the current question.
-- Do NOT proceed to the next question until the current one is clearly answered.
-- Keep messages short — this is Instagram DM, 2-3 sentences max per message.
-- Once you have all 6 pieces of information clearly confirmed, end your final message with EXACTLY this JSON on its own line (this will be stripped before sending to the user):
+Voice rules:
+- Sound like a real person texting, not a chatbot or customer service rep
+- Short messages only. 1 to 3 sentences max. This is Instagram DM.
+- Ask ONE question per message. Never stack questions.
+- No double dashes. No em dashes. Use a period or comma instead.
+- No more than one emoji per message, often zero. Only use one if it genuinely fits.
+- No "Great!" or "Perfect!" or "Awesome!" reactions. Just move naturally to the next question.
+- If they're vague or off-topic, redirect in a chill way without making it feel like a form.
+- Do NOT say things like "intake," "process," "service," or anything that sounds corporate.
+- Once you have all 6 answers clearly, end your final message with EXACTLY this JSON on a new line (it will be stripped before sending):
 {"__intake_complete__": true, "name": "...", "location": "...", "age": "...", "gender": "...", "lookingFor": "...", "aboutMe": "..."}`;
 
 // ── Parse completion JSON from Claude response ────────────────────────────
@@ -133,13 +137,13 @@ export async function handleIntakeMessage(
 
   // Already completed
   if (session.completed) {
-    await sendReply("Your profile is already submitted! Andrea will be in touch soon. 💕");
+    await sendReply("You're already in! Andrea will reach out soon.");
     return;
   }
 
   // First contact — send welcome + first question (ignore any initial text)
   if (session.messages.length === 0) {
-    const welcome = "Welcome to Andrea's Love Lab! 💕 I'm so excited you're here. I just have a few quick questions to find your perfect match. First — what's your name?";
+    const welcome = "Hey! So glad you reached out. I just need a few things from you to get started. What's your name?";
     session.messages.push({ role: 'assistant', content: welcome });
     await sendReply(welcome);
     return;
@@ -174,7 +178,7 @@ export async function handleIntakeMessage(
     };
     saveIntake(session, complete);
 
-    const closing = visibleText || `Thanks, ${complete.name}! 🌹 Andrea will review your profile and reach out soon. Stay tuned!`;
+    const closing = visibleText || `That's everything, ${complete.name}. Andrea will go through your profile and reach out soon 🌹`;
     await sendReply(closing);
   } else {
     await sendReply(visibleText);
